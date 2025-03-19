@@ -1,225 +1,122 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quantum Image Processor</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Orbitron', sans-serif;
-            background: linear-gradient(45deg, #0d0015, #1a0033);
-            color: #00ffcc;
-            text-align: center;
-            padding: 20px;
-            min-height: 100vh;
-        }
-        h1 {
-            text-shadow: 0 0 10px #00ffcc, 0 0 20px #00ffcc;
-            letter-spacing: 2px;
-        }
-        canvas {
-            width: 160px;
-            height: 80px;
-            border: 2px solid #00ffcc;
-            border-radius: 5px;
-            margin: 20px auto;
-            background: #0d0015;
-            box-shadow: 0 0 15px #00ffcc;
-        }
-        .controls {
-            margin: 20px;
-            padding: 20px;
-            background: rgba(0, 255, 204, 0.1);
-            border-radius: 10px;
-            border: 1px solid #00ffcc;
-            max-width: 600px;
-            margin: 20px auto;
-        }
-        .control-group {
-            margin: 15px 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-        label {
-            text-shadow: 0 0 5px #00ffcc;
-            min-width: 100px;
-        }
-        input[type="range"] {
-            -webkit-appearance: none;
-            width: 200px;
-            height: 8px;
-            background: #00ffcc;
-            border-radius: 5px;
-            outline: none;
-            opacity: 0.7;
-            transition: opacity 0.2s;
-        }
-        input[type="range"]:hover {
-            opacity: 1;
-        }
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 20px;
-            height: 20px;
-            background: #ff00ff;
-            border-radius: 50%;
-            cursor: pointer;
-            box-shadow: 0 0 10px #ff00ff;
-        }
-        input[type="file"] {
-            color: #00ffcc;
-            background: rgba(0, 255, 204, 0.2);
-            padding: 8px;
-            border-radius: 5px;
-            border: 1px solid #00ffcc;
-        }
-        button {
-            background: #ff00ff;
-            color: #0d0015;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 5px;
-            cursor: pointer;
-            text-shadow: 0 0 5px #0d0015;
-            box-shadow: 0 0 10px #ff00ff;
-            transition: all 0.3s;
-        }
-        button:hover {
-            background: #00ffcc;
-            color: #0d0015;
-            box-shadow: 0 0 15px #00ffcc;
-        }
-        p {
-            text-shadow: 0 0 5px #00ffcc;
-            font-size: 0.9em;
-        }
-    </style>
-</head>
-<body>
-    <h1>Quantum Image Processor</h1>
-    
-    <div class="controls">
-        <div class="control-group">
-            <input type="file" id="imageInput" accept="image/*">
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Unity WebGL Player | Shooter</title>
+    <link rel="shortcut icon" href="TemplateData/favicon.ico">
+    <link rel="stylesheet" href="TemplateData/style.css">
+  </head>
+  <body>
+    <div id="unity-container" class="unity-desktop">
+      <canvas id="unity-canvas" width=960 height=540 tabindex="-1"></canvas>
+      <div id="unity-loading-bar">
+        <div id="unity-logo"></div>
+        <div id="unity-progress-bar-empty">
+          <div id="unity-progress-bar-full"></div>
         </div>
-        <div class="control-group">
-            <label for="brightness">Luminance:</label>
-            <input type="range" id="brightness" min="-100" max="100" value="0">
-        </div>
-        <div class="control-group">
-            <label for="scale">Quantum Scale:</label>
-            <input type="range" id="scale" min="0.1" max="3" step="0.1" value="1">
-        </div>
-        <div class="control-group">
-            <label for="posX">X-Coordinate:</label>
-            <input type="range" id="posX" min="-160" max="160" value="0">
-        </div>
-        <div class="control-group">
-            <label for="posY">Y-Coordinate:</label>
-            <input type="range" id="posY" min="-80" max="80" value="0">
-        </div>
-        <div class="control-group">
-            <button onclick="toggleGrayscale()">Monochrome Shift</button>
-            <button onclick="resetImage()">System Reset</button>
-        </div>
+      </div>
+      <div id="unity-warning"> </div>
+      <div id="unity-footer">
+        <div id="unity-webgl-logo"></div>
+        <div id="unity-fullscreen-button"></div>
+        <div id="unity-build-title">Shooter</div>
+      </div>
     </div>
-
-    <canvas id="canvas" width="160" height="80"></canvas>
-
     <script>
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        const imageInput = document.getElementById('imageInput');
-        const brightnessSlider = document.getElementById('brightness');
-        const scaleSlider = document.getElementById('scale');
-        const posXSlider = document.getElementById('posX');
-        const posYSlider = document.getElementById('posY');
-        
-        let img = new Image();
-        let originalImageData = null;
-        let isGrayscale = false;
-        let scale = 1;
-        let posX = 0;
-        let posY = 0;
 
-        imageInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            const reader = new FileReader();
-            
-            reader.onload = function(event) {
-                img.onload = function() {
-                    updateImage();
-                    originalImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                    applyFilters();
-                }
-                img.src = event.target.result;
-            }
-            reader.readAsDataURL(file);
-        });
+      var container = document.querySelector("#unity-container");
+      var canvas = document.querySelector("#unity-canvas");
+      var loadingBar = document.querySelector("#unity-loading-bar");
+      var progressBarFull = document.querySelector("#unity-progress-bar-full");
+      var fullscreenButton = document.querySelector("#unity-fullscreen-button");
+      var warningBanner = document.querySelector("#unity-warning");
 
-        [brightnessSlider, scaleSlider, posXSlider, posYSlider].forEach(slider => {
-            slider.addEventListener('input', () => {
-                scale = parseFloat(scaleSlider.value);
-                posX = parseInt(posXSlider.value);
-                posY = parseInt(posYSlider.value);
-                updateImage();
-                applyFilters();
-            });
-        });
-
-        function updateImage() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            const scaledWidth = img.width * scale;
-            const scaledHeight = img.height * scale;
-            ctx.drawImage(img, posX, posY, scaledWidth, scaledHeight);
+      // Shows a temporary message banner/ribbon for a few seconds, or
+      // a permanent error message on top of the canvas if type=='error'.
+      // If type=='warning', a yellow highlight color is used.
+      // Modify or remove this function to customize the visually presented
+      // way that non-critical warnings and error messages are presented to the
+      // user.
+      function unityShowBanner(msg, type) {
+        function updateBannerVisibility() {
+          warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
         }
-
-        function applyFilters() {
-            if (!originalImageData) return;
-
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const data = imageData.data;
-            const brightness = parseInt(brightnessSlider.value);
-
-            for (let i = 0; i < data.length; i += 4) {
-                data[i] = Math.min(255, Math.max(0, data[i] + brightness));
-                data[i + 1] = Math.min(255, Math.max(0, data[i + 1] + brightness));
-                data[i + 2] = Math.min(255, Math.max(0, data[i + 2] + brightness));
-
-                if (isGrayscale) {
-                    const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
-                    data[i] = data[i + 1] = data[i + 2] = avg;
-                }
-            }
-
-            ctx.putImageData(imageData, 0, 0);
+        var div = document.createElement('div');
+        div.innerHTML = msg;
+        warningBanner.appendChild(div);
+        if (type == 'error') div.style = 'background: red; padding: 10px;';
+        else {
+          if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
+          setTimeout(function() {
+            warningBanner.removeChild(div);
+            updateBannerVisibility();
+          }, 5000);
         }
+        updateBannerVisibility();
+      }
 
-        function toggleGrayscale() {
-            isGrayscale = !isGrayscale;
-            updateImage();
-            applyFilters();
-        }
+      var buildUrl = "Build";
+      var loaderUrl = buildUrl + "/grokbuildinfo.loader.js";
+      var config = {
+        dataUrl: buildUrl + "/grokbuildinfo.data",
+        frameworkUrl: buildUrl + "/grokbuildinfo.framework.js",
+        codeUrl: buildUrl + "/grokbuildinfo.wasm",
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "DefaultCompany",
+        productName: "Shooter",
+        productVersion: "3.0.0",
+        showBanner: unityShowBanner,
+      };
 
-        function resetImage() {
-            if (!originalImageData) return;
-            isGrayscale = false;
-            brightnessSlider.value = 0;
-            scaleSlider.value = 1;
-            posXSlider.value = 0;
-            posYSlider.value = 0;
-            scale = 1;
-            posX = 0;
-            posY = 0;
-            updateImage();
-            ctx.putImageData(originalImageData, 0, 0);
-        }
+      // By default Unity keeps WebGL canvas render target size matched with
+      // the DOM size of the canvas element (scaled by window.devicePixelRatio)
+      // Set this to false if you want to decouple this synchronization from
+      // happening inside the engine, and you would instead like to size up
+      // the canvas DOM size and WebGL render target sizes yourself.
+      // config.matchWebGLToCanvasSize = false;
+
+      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        // Mobile device style: fill the whole browser client area with the game canvas:
+
+        var meta = document.createElement('meta');
+        meta.name = 'viewport';
+        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
+        document.getElementsByTagName('head')[0].appendChild(meta);
+        container.className = "unity-mobile";
+        canvas.className = "unity-mobile";
+
+        // To lower canvas resolution on mobile devices to gain some
+        // performance, uncomment the following line:
+        // config.devicePixelRatio = 1;
+
+
+      } else {
+        // Desktop style: Render the game canvas in a window that can be maximized to fullscreen:
+
+        canvas.style.width = "960px";
+        canvas.style.height = "540px";
+      }
+
+      loadingBar.style.display = "block";
+
+      var script = document.createElement("script");
+      script.src = loaderUrl;
+      script.onload = () => {
+        createUnityInstance(canvas, config, (progress) => {
+          progressBarFull.style.width = 100 * progress + "%";
+              }).then((unityInstance) => {
+                loadingBar.style.display = "none";
+                fullscreenButton.onclick = () => {
+                  unityInstance.SetFullscreen(1);
+                };
+              }).catch((message) => {
+                alert(message);
+              });
+            };
+
+      document.body.appendChild(script);
+
     </script>
-
-    <p>Quantum Display initialized at 160x80. Upload, scale, and align your hologram.</p>
-    <p>Right-click and save your processed image for neural network integration.</p>
-</body>
+  </body>
 </html>
